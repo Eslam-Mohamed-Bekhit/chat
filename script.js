@@ -4,6 +4,7 @@ let localStream;
 let remoteStream;
 let localVideo = document.getElementById('localVideo');
 let remoteVideo = document.getElementById('remoteVideo');
+let remotePeerId; // تعريف متغير لمعرف النظير البعيد
 
 startButton.addEventListener('click', startChat);
 stopButton.addEventListener('click', stopChat);
@@ -35,10 +36,13 @@ function startChat() {
         .then(function (stream) {
             localStream = stream;
             localVideo.srcObject = stream;
-            const call = peer.call('remote-peer-id', stream); // استدعاء الطرف البعيد
-            call.on('stream', function (remoteStream) {
-                // عرض فيديو الطرف البعيد
-                remoteVideo.srcObject = remoteStream;
+            peer.call(remotePeerId, stream); // استدعاء الطرف البعيد باستخدام معرف النظير البعيد
+            peer.on('call', function (call) {
+                call.answer(localStream); // الرد على المكالمة الواردة
+                call.on('stream', function (remoteStream) {
+                    // عرض فيديو الطرف البعيد
+                    remoteVideo.srcObject = remoteStream;
+                });
             });
         })
         .catch(function (err) {
