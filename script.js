@@ -4,48 +4,48 @@ let localStream;
 let remoteStream;
 let localVideo = document.getElementById('localVideo');
 let remoteVideo = document.getElementById('remoteVideo');
-let peer;
 
 startButton.addEventListener('click', startChat);
 stopButton.addEventListener('click', stopChat);
 
-navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    .then(stream => {
-        localStream = stream;
-        localVideo.srcObject = localStream;
-    })
-    .catch(error => {
-        console.error('Error accessing media devices:', error);
-    });
+const peer = new Peer(); // إنشاء عميل Peer
 
-startButton.disabled = false;
+peer.on('open', function (id) {
+    console.log('My peer ID is: ' + id);
+});
+
+peer.on('call', function (incomingCall) {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(function (stream) {
+            localStream = stream;
+            localVideo.srcObject = stream;
+            incomingCall.answer(stream); // الرد على المكالمة الواردة
+            incomingCall.on('stream', function (remoteStream) {
+                // عرض فيديو الطرف البعيد
+                remoteVideo.srcObject = remoteStream;
+            });
+        })
+        .catch(function (err) {
+            console.error('Failed to get local stream', err);
+        });
+});
 
 function startChat() {
-    peer = new Peer(); // إنشاء كائن Peer
-
-    // عند استلام معرف النداء الصادر من الخادم
-    peer.on('call', call => {
-        // قبول النداء وإرسال الفيديو المحلي
-        call.answer(localStream);
-        call.on('stream', remoteStream => {
-            // عندما يصل فيديو من الطرف الآخر، عرضه في عنصر الفيديو البعيد
-            remoteVideo.srcObject = remoteStream;
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(function (stream) {
+            localStream = stream;
+            localVideo.srcObject = stream;
+            const call = peer.call('remote-peer-id', stream); // استدعاء الطرف البعيد
+            call.on('stream', function (remoteStream) {
+                // عرض فيديو الطرف البعيد
+                remoteVideo.srcObject = remoteStream;
+            });
+        })
+        .catch(function (err) {
+            console.error('Failed to get local stream', err);
         });
-    });
-
-    // الاتصال بالخادم
-    peer.on('open', id => {
-        console.log('My peer ID is: ' + id);
-    });
 }
 
 function stopChat() {
-    // إغلاق الاتصال مع الخادم
-    if (peer) {
-        peer.destroy();
-    }
-
-    // إيقاف تشغيل الفيديو المحلي وإزالة تدفق الفيديو من عنصر الفيديو المحلي
-    localStream.getTracks().forEach(track => track.stop());
-    localVideo.srcObject = null;
+    localStream.getTracks().forEach(track => track.stop()); // إيقاف جميع المسارات في الفيديو المحلي
 }
