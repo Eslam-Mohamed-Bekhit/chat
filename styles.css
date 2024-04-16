@@ -5,6 +5,10 @@
     flex-wrap: wrap;
 }
 
+body {
+    background-color: green;
+}
+
 .video-wrapper {
     margin: 10px;
     width: 100%;
