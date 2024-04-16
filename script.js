@@ -4,52 +4,41 @@ let localStream;
 let remoteStream;
 let localVideo = document.getElementById('localVideo');
 let remoteVideo = document.getElementById('remoteVideo');
-let remotePeerId; // تعريف متغير لمعرف النظير البعيد
+let myPeerId; // تعريف المعرف الخاص بك
+const peer = new Peer();
 
 startButton.addEventListener('click', startChat);
 stopButton.addEventListener('click', stopChat);
 
-const peer = new Peer(); // إنشاء عميل Peer
+const webrtc = new SimpleWebRTC({
+    localVideoEl: 'localVideo',
+    remoteVideoEl: 'remoteVideo',
+    autoRequestMedia: true, // طلب تصريح الوصول إلى الوسائط تلقائيًا
+});
+
+webrtc.on('readyToCall', function () {
+    startButton.disabled = false; // تمكين زر البدء عندما يكون النظام جاهزًا
+});
 
 peer.on('open', function (id) {
-    console.log('My peer ID is: ' + id);
+    myPeerId = id;
+    console.log('My peer ID is: ' + myPeerId);
 });
 
-peer.on('call', function (incomingCall) {
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then(function (stream) {
-            localStream = stream;
-            localVideo.srcObject = stream;
-            incomingCall.answer(stream); // الرد على المكالمة الواردة
-            incomingCall.on('stream', function (remoteStream) {
-                // عرض فيديو الطرف البعيد
-                remoteVideo.srcObject = remoteStream;
-            });
-        })
-        .catch(function (err) {
-            console.error('Failed to get local stream', err);
-        });
-});
+async function startChat() {
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); // الحصول على تصريح لاستخدام الكاميرا والميكروفون
+        webrtc.startLocalVideo(); // بدء تشغيل الفيديو المحلي
 
-function startChat() {
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then(function (stream) {
-            localStream = stream;
-            localVideo.srcObject = stream;
-            peer.call(remotePeerId, stream); // استدعاء الطرف البعيد باستخدام معرف النظير البعيد
-            peer.on('call', function (call) {
-                call.answer(localStream); // الرد على المكالمة الواردة
-                call.on('stream', function (remoteStream) {
-                    // عرض فيديو الطرف البعيد
-                    remoteVideo.srcObject = remoteStream;
-                });
-            });
-        })
-        .catch(function (err) {
-            console.error('Failed to get local stream', err);
-        });
+        // الانضمام إلى غرفة الدردشة
+        webrtc.joinRoom(myPeerId); // استخدام المعرف الذي تم تعيينه بشكل برمجي
+
+    } catch (error) {
+        console.error('Error starting chat:', error);
+    }
 }
 
 function stopChat() {
-    localStream.getTracks().forEach(track => track.stop()); // إيقاف جميع المسارات في الفيديو المحلي
+    webrtc.leaveRoom(); // مغادرة الغرفة
+    webrtc.stopLocalVideo(); // إيقاف تشغيل الفيديو المحلي
 }
