@@ -1,4 +1,4 @@
-const startButton = document.getElementById('startButton');
+/* const startButton = document.getElementById('startButton');
 const stopButton = document.getElementById('stopButton');
 let localStream;
 let remoteStream;
@@ -38,4 +38,42 @@ function stopChat() {
     // قم بإيقاف تشغيل الاتصال وإغلاق تدفقات الوسائط
     localStream.getTracks().forEach(track => track.stop());
     remoteStream.getTracks().forEach(track => track.stop());
+}
+ */
+const startButton = document.getElementById('startButton');
+const stopButton = document.getElementById('stopButton');
+let localStream;
+let remoteStream;
+let localVideo = document.getElementById('localVideo');
+let remoteVideo = document.getElementById('remoteVideo');
+
+startButton.addEventListener('click', startChat);
+stopButton.addEventListener('click', stopChat);
+
+const webrtc = new SimpleWebRTC({
+    localVideoEl: 'localVideo',
+    remoteVideoEl: 'remoteVideo',
+    autoRequestMedia: true, // طلب تصريح الوصول إلى الوسائط تلقائيًا
+});
+
+webrtc.on('readyToCall', function () {
+    startButton.disabled = false; // تمكين زر البدء عندما يكون النظام جاهزًا
+});
+
+async function startChat() {
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); // الحصول على تصريح لاستخدام الكاميرا والميكروفون
+        webrtc.startLocalVideo(); // بدء تشغيل الفيديو المحلي
+
+        // الانضمام إلى غرفة الدردشة
+        webrtc.joinRoom('your-room-id'); // استبدال 'your-room-id' بمعرف الغرفة الخاصة بك
+
+    } catch (error) {
+        console.error('Error starting chat:', error);
+    }
+}
+
+function stopChat() {
+    webrtc.leaveRoom(); // مغادرة الغرفة
+    webrtc.stopLocalVideo(); // إيقاف تشغيل الفيديو المحلي
 }
