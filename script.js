@@ -1,79 +1,51 @@
-/* const startButton = document.getElementById('startButton');
-const stopButton = document.getElementById('stopButton');
-let localStream;
-let remoteStream;
-let localVideo = document.getElementById('localVideo');
-let remoteVideo = document.getElementById('remoteVideo');
-
-startButton.addEventListener('click', startChat);
-stopButton.addEventListener('click', stopChat);
-
-async function startChat() {
-    try {
-        const constraints = { video: { width: { exact: 640 }, height: { exact: 480 } }, audio: true }; // تحديد القيود للجودة
-        localStream = await navigator.mediaDevices.getUserMedia(constraints); // الحصول على تصريح لاستخدام الكاميرا والميكروفون
-        localVideo.srcObject = localStream; // تعيين تدفق الوسائط المحلي إلى عنصر الفيديو
-        const configuration = { audio: true, video: true }; // تكوين PeerConnection
-
-        const peerConnection = new RTCPeerConnection(configuration); // إنشاء اتصال بين الزميلين
-
-        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream)); // إضافة تدفقات الوسائط المحلية إلى اتصال النداء
-        peerConnection.ontrack = handleRemoteStreamAdded; // التعامل مع تدفق وسائط بعيدة عند الإضافة
-
-        const offer = await peerConnection.createOffer(); // إنشاء عرض (offer)
-        await peerConnection.setLocalDescription(offer); // تعيين العرض كوصف محلي
-
-        // قم بإرسال العرض إلى الزميل الآخر عبر وسيط الإرسال (Signaling Server)، هنا يمكن استخدام سيرفر بسيط لهذه الغاية
-    } catch (error) {
-        console.error('Error starting chat:', error);
-    }
-}
-
-function handleRemoteStreamAdded(event) {
-    remoteStream = event.streams[0]; // تعيين تدفق الوسائط البعيدة
-    remoteVideo.srcObject = remoteStream; // عرض تدفق الوسائط البعيدة على عنصر الفيديو
-}
-
-function stopChat() {
-    // قم بإيقاف تشغيل الاتصال وإغلاق تدفقات الوسائط
-    localStream.getTracks().forEach(track => track.stop());
-    remoteStream.getTracks().forEach(track => track.stop());
-}
- */
 const startButton = document.getElementById('startButton');
 const stopButton = document.getElementById('stopButton');
 let localStream;
 let remoteStream;
 let localVideo = document.getElementById('localVideo');
 let remoteVideo = document.getElementById('remoteVideo');
+let peer;
 
 startButton.addEventListener('click', startChat);
 stopButton.addEventListener('click', stopChat);
 
-const webrtc = new SimpleWebRTC({
-    localVideoEl: 'localVideo',
-    remoteVideoEl: 'remoteVideo',
-    autoRequestMedia: true, // طلب تصريح الوصول إلى الوسائط تلقائيًا
-});
+navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    .then(stream => {
+        localStream = stream;
+        localVideo.srcObject = localStream;
+    })
+    .catch(error => {
+        console.error('Error accessing media devices:', error);
+    });
 
-webrtc.on('readyToCall', function () {
-    startButton.disabled = false; // تمكين زر البدء عندما يكون النظام جاهزًا
-});
+startButton.disabled = false;
 
-async function startChat() {
-    try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); // الحصول على تصريح لاستخدام الكاميرا والميكروفون
-        webrtc.startLocalVideo(); // بدء تشغيل الفيديو المحلي
+function startChat() {
+    peer = new Peer(); // إنشاء كائن Peer
 
-        // الانضمام إلى غرفة الدردشة
-        webrtc.joinRoom('your-room-id'); // استبدال 'your-room-id' بمعرف الغرفة الخاصة بك
+    // عند استلام معرف النداء الصادر من الخادم
+    peer.on('call', call => {
+        // قبول النداء وإرسال الفيديو المحلي
+        call.answer(localStream);
+        call.on('stream', remoteStream => {
+            // عندما يصل فيديو من الطرف الآخر، عرضه في عنصر الفيديو البعيد
+            remoteVideo.srcObject = remoteStream;
+        });
+    });
 
-    } catch (error) {
-        console.error('Error starting chat:', error);
-    }
+    // الاتصال بالخادم
+    peer.on('open', id => {
+        console.log('My peer ID is: ' + id);
+    });
 }
 
 function stopChat() {
-    webrtc.leaveRoom(); // مغادرة الغرفة
-    webrtc.stopLocalVideo(); // إيقاف تشغيل الفيديو المحلي
+    // إغلاق الاتصال مع الخادم
+    if (peer) {
+        peer.destroy();
+    }
+
+    // إيقاف تشغيل الفيديو المحلي وإزالة تدفق الفيديو من عنصر الفيديو المحلي
+    localStream.getTracks().forEach(track => track.stop());
+    localVideo.srcObject = null;
 }

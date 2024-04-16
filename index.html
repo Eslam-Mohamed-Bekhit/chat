@@ -16,20 +16,13 @@
         <div class="video-wrapper">
             <video id="remoteVideo" autoplay></video> <!-- فيديو المستخدم البعيد -->
         </div>
-        <div class="video-wrapper">
-            <video id="localVideo" autoplay muted></video> <!-- فيديو المستخدم المحلي -->
-        </div>
     </div>
     <div class="button-container">
         <button id="startButton">Start</button> <!-- زر لبدء الدردشة -->
         <button id="stopButton">Stop</button> <!-- زر لإيقاف الدردشة -->
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
-    <!-- تضمين مكتبة Socket.io -->
-    <script src="https://cdn.jsdelivr.net/npm/webrtc-adapter/out/adapter.js"></script> <!-- تضمين مكتبة Adapter.js -->
-    <script src="https://cdn.jsdelivr.net/npm/simplewebrtc@3.0.2/out/simplewebrtc.bundle.min.js
-    "></script> <!-- تضمين مكتبة SimpleWebRTC -->
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.3.1/dist/peerjs.min.js"></script> <!-- تضمين مكتبة PeerJS -->
     <script src="script.js"></script> <!-- تضمين ملف جافا سكريبت -->
 </body>
 
