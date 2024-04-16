@@ -10,11 +10,17 @@
 
 <body>
     <div id="videos-container">
-        <video id="localVideo" autoplay muted></video> <!-- عنصر فيديو للمستخدم الحالي -->
-        <video id="remoteVideo" autoplay></video> <!-- عنصر فيديو للمستخدم الآخر -->
+        <div class="video-wrapper">
+            <video id="localVideo" autoplay muted></video> <!-- فيديو المستخدم المحلي -->
+        </div>
+        <div class="video-wrapper">
+            <video id="remoteVideo" autoplay></video> <!-- فيديو المستخدم البعيد -->
+        </div>
     </div>
-    <button id="startButton">Start</button> <!-- زر لبدء الدردشة -->
-    <button id="stopButton">Stop</button> <!-- زر لإنهاء الدردشة -->
+    <div class="button-container">
+        <button id="startButton">Start</button> <!-- زر لبدء الدردشة -->
+        <button id="stopButton">Stop</button> <!-- زر لإيقاف الدردشة -->
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <!-- تضمين مكتبة Socket.io -->
