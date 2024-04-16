@@ -1,0 +1,10 @@
+#videos-container {
+    display: flex;
+    justify-content: center;
+}
+
+video {
+    max-width: 50%;
+    margin: 10px;
+    border: 1px solid #ccc;
+}

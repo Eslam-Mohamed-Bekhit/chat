@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRTC Voice and Video Chat</title>
+    <link rel="stylesheet" href="styles.css"> <!-- تضمين ملف CSS -->
+</head>
+
+<body>
+    <div id="videos-container">
+        <video id="localVideo" autoplay muted></video> <!-- عنصر فيديو للمستخدم الحالي -->
+        <video id="remoteVideo" autoplay></video> <!-- عنصر فيديو للمستخدم الآخر -->
+    </div>
+    <button id="startButton">Start</button> <!-- زر لبدء الدردشة -->
+    <button id="stopButton">Stop</button> <!-- زر لإنهاء الدردشة -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <!-- تضمين مكتبة Socket.io -->
+    <script src="https://cdn.jsdelivr.net/npm/webrtc-adapter/out/adapter.js"></script> <!-- تضمين مكتبة Adapter.js -->
+    <script src="script.js"></script> <!-- تضمين ملف جافا سكريبت -->
+</body>
+
+</html>
