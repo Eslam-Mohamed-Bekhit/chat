@@ -7,15 +7,14 @@
 
 body {
     background-color: green;
+    /* تغيير لون خلفية الصفحة */
 }
 
 .video-wrapper {
     margin: 10px;
     width: 100%;
     max-width: 300px;
-    /* تحديد العرض الأقصى للفيديو للتجنب من الفقدان */
     overflow: hidden;
-    /* تجنب عرض زائد أو تمدد الفيديو */
     border: 1px solid #ccc;
     border-radius: 5px;
 }
@@ -23,7 +22,6 @@ body {
 .video-wrapper video {
     width: 100%;
     height: auto;
-    /* ضبط الارتفاع تلقائيًا وفقًا لعرض الفيديو */
     display: block;
 }
 
